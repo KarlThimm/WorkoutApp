@@ -30,6 +30,7 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <h1>Hi</h1>
+    <div id="user-info">Loading...</div> 
 <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
@@ -45,5 +46,28 @@
     </form>
 
   </body>
+
+  <!--Displaying logged in user api route-->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/api/user', {
+        credentials: 'include' // Ensures cookies are sent with the request
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch user details');
+          }
+          return response.json();
+        })
+        .then(data => {
+          document.getElementById('user-info').textContent = `Hi, ${data.user.username}`;
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          document.getElementById('user-info').textContent = 'Not logged in';
+        });
+    });
+  </script> 
+
 </html>
 

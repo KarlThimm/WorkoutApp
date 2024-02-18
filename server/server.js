@@ -88,6 +88,7 @@ app.post('/login', async (req, res) => {
               // Passwords match
               // Implement session or token-based authentication here
               req.session.userId = user.id; // Example using express-session
+              req.session.user = { id: user.id, username: user.username }; // Store user details in session
               res.redirect('/logged.html'); // Redirect to a protected dashboard page
           } else {
               // Passwords don't match
@@ -110,14 +111,28 @@ app.use(express.static('public'));
   app.get('/logout', (req, res) => {
     req.logout(function(err) {
       if (err) { return next(err); }
-      res.redirect('/'); // Redirect to homepage or login page after logout
+      //Destroy session
+      req.session.destroy(() => {
+        res.clearCookie('connect.sid', { path: '/'}); //Clear cookie
+        res.redirect('/'); // Redirect to homepage or login page after logout
+      });
     });
   });
+
+//Displaying logged in user:
+app.get('/api/user', (req, res) => {
+  if (req.session.user) {
+    res.json({ user: req.session.user });
+  } else {
+    res.status(401).send('Unauthorized');
+  }
+});
 
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
 
 //How the table for username and password was created
 

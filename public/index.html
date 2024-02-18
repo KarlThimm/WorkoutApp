@@ -12,6 +12,14 @@
         <input type="password" name="password" placeholder="Password" required>
         <button type="submit">Login</button>
     </form>
+
+    <!--Button to go to register page-->
+    <button id="registerBtn">Register</button>
+    <script>
+        document.getElementById('registerBtn').addEventListener('click', function() {
+          window.location.href = 'register.html';
+        });
+    </script>
 </body>
 </html>
 
