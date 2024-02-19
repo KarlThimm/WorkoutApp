@@ -13,9 +13,9 @@
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
+    
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
+    
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
       Only files inside the `public` folder can be referenced from the HTML.
@@ -31,6 +31,10 @@
     <div id="root"></div>
     <h1>Hi</h1>
     <div id="user-info">Loading...</div> 
+
+    <div id="workouts"></div>
+
+
 <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
@@ -44,6 +48,16 @@
     <form action="/logout" method="get">
       <button type="submit">Logout</button>
     </form>
+
+    <form id="workoutForm">
+      <input type="text" id="name" placeholder="Workout Name" required />
+      <input type="number" id="sets" placeholder="Sets" required />
+      <input type="number" id="reps" placeholder="Reps" required />
+      <input type="number" id="weight" placeholder="Weight" required />
+      <input type="date" id="workout_date" required />
+      <button type="submit">Add Workout</button>
+    </form>
+    
 
   </body>
 
@@ -67,6 +81,57 @@
           document.getElementById('user-info').textContent = 'Not logged in';
         });
     });
+
+    //Send workouts
+document.getElementById('workoutForm').addEventListener('submit', function(e) {
+  e.preventDefault(); // Prevent the default form submission
+  
+  const workoutData = {
+    name: document.getElementById('name').value,
+    sets: document.getElementById('sets').value,
+    reps: document.getElementById('reps').value,
+    weight: document.getElementById('weight').value,
+    workout_date: document.getElementById('workout_date').value,
+  };
+
+  fetch('/api/workouts', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify(workoutData),
+    credentials: 'include' // Ensures cookies are sent with the request
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Workout added:', data);
+    fetchWorkouts(); // Refresh the list of workouts
+  })
+  .catch(error => {
+    console.error('Error adding workout:', error);
+  });
+});
+
+
+
+function fetchWorkouts() {
+  fetch('/api/workouts')
+    .then(response => response.json())
+    .then(workouts => {
+      const workoutsContainer = document.getElementById('workouts');
+      workoutsContainer.innerHTML = ''; // Clear existing workouts
+      workouts.forEach(workout => {
+        const workoutElement = document.createElement('div');
+        workoutElement.textContent = `Name: ${workout.name}, Sets: ${workout.sets}, Reps: ${workout.reps}, Weight: ${workout.weight}, Date: ${workout.workout_date}`;
+        workoutsContainer.appendChild(workoutElement);
+      });
+    })
+    .catch(error => console.error('Error fetching workouts:', error));
+}
+
+// Call fetchWorkouts to load workouts on page load
+fetchWorkouts();
   </script> 
 
 </html>

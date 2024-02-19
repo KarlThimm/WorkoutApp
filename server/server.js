@@ -8,6 +8,7 @@ const express = require('express');
 const { Pool } = require('pg');
 const passport = require('passport');
 const GitHubStrategy = require('passport-github').Strategy;
+const InstagramStrategy = require('passport-instagram').Strategy;
 const session = require('express-session');
 const bcrypt = require('bcrypt');
 
@@ -15,6 +16,7 @@ const app = express();
 const port = 3001; // Port where your backend server will be listening
 
 app.use(express.urlencoded({ extended: true })); // This line is required for parsing URL-encoded bodies (form data)
+app.use(express.json()); // This line should be before your route definitions
 
 // Create a new pool instance to manage your PostgreSQL connections
 const pool = new Pool({
@@ -23,20 +25,6 @@ const pool = new Pool({
   database: 'myappdb',          // Your database name
   password: process.env.DB_PASSWORD,     // Your PostgreSQL password
   port: 5432,                   // Your database port, 5432 is the default for PostgreSQL
-});
-
-// Define a GET route
-app.get('/api/hello', async (req, res) => {
-  try {
-    // Query your database
-    const { rows } = await pool.query('SELECT \'Hello, World!\' as message');
-    // Send the query result back to the client
-    res.json(rows[0]);
-  } catch (err) {
-    // Handle any errors
-    console.error(err.message);
-    res.status(500).send('Server error');
-  }
 });
 
 // Session configuration
@@ -133,6 +121,41 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
+//Adding a workout to database
+app.post('/api/workouts', async (req, res) => {
+  // Extract workout details from the request body
+  console.log(req.body);
+  const { name, sets, reps, weight, workout_date } = req.body;
+  const userId = req.session.user.id; // Assuming you store logged-in user's ID in session
+
+  try {
+    const result = await pool.query(
+      'INSERT INTO workouts (user_id, name, sets, reps, weight, workout_date) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [userId, name, sets, reps, weight, workout_date]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server error');
+  }
+});
+
+//Getting a workout form dattabse
+app.get('/api/workouts', async (req, res) => {
+  const userId = req.session.user.id;
+
+  try {
+    const result = await pool.query(
+      'SELECT * FROM workouts WHERE user_id = $1 ORDER BY workout_date DESC',
+      [userId]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server error');
+  }
+});
+
 
 //How the table for username and password was created
 
@@ -141,3 +164,16 @@ app.listen(port, () => {
   username VARCHAR(255) UNIQUE NOT NULL,
   password VARCHAR(255) NOT NULL
 ); */
+
+//Workout table
+/*CREATE TABLE workouts (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  name VARCHAR(255) NOT NULL,
+  sets INTEGER NOT NULL,
+  reps INTEGER NOT NULL,
+  weight INTEGER NOT NULL,
+  workout_date DATE NOT NULL,
+  UNIQUE(user_id, name, workout_date)
+);
+*/

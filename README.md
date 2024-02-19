@@ -1,7 +1,16 @@
-6. Social Media Dashboard
-Description: A dashboard that aggregates your personal social media metrics from various platforms (e.g., Twitter, Instagram, GitHub) to track your online presence and activity.
-Technologies: React for the frontend, with a Node.js backend to handle API requests to social media platforms, and an SQL database to store historical data.
-Features: OAuth authentication, real-time data fetching, historical activity graphs, and sentiment analysis of your social media posts.
+Creating an app that lets you enter workouts and track the reps, sets, weight, date, etc. You can then see the workouts you have done then compare your results and progress.
+
+Done:
+1. Login using a sql database storing username and password, encrypting the password with bcrypt.
+2. Can add workouts unique to the user signed in
+3. Can view the workouts that are stores in an sql database
+
+To Do:
+1. CSS
+2. Format the data better
+3. Compare results automatically
+4. Will think of more as I go
+
 
 # Getting Started with Create React App
 
